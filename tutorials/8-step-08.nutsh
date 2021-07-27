@@ -1,0 +1,125 @@
+lesson_name("Module Git")
+make_and_go_ws
+clear_ws
+run(`cp /tutorials/files/step-8/hosts hosts`)
+run(`cp -r /tutorials/files/step-8/files files`)
+
+"`Déployer notre site Web à partir de Git`"
+
+"Nous avons installé apache, poussé notre virtualhost et enfin redémarré notre serveur de manière sécurisée. Maintenant, nous allons déployer notre application avec le module `git`."
+
+enter_to_continue
+
+"`Le module Git`"
+
+"Cette leçon est une sorte de 'break'. Rien n'est crucial dans cette activité. Le module `git` est juste un autre module parmi les autres que l'on va essayer et avec lequel nous serons familier quand il faudra l'utiliser plus tard avec la commande `ansible-pull`."
+
+"Notre hôte virtuel est configuré mais quelques modifications sont nécessaires pour terminer la configuration du déploiement. D'abord, nous avons besoin d'installer le paquet `libapache2-mod-php5` car nous déployons une application PHP. Ensuite, nous avons à installer git car il est utilisé par le module `git` afin de cloner notre application."
+
+enter_to_continue
+
+"On pourrait tenter ceci pour chaque paquet :"
+
+print("\t
+...\n\t
+- name: Installs apache web server\n\t
+  apt:\n\t
+    name: apache2\n\t
+    state: present\n\t
+    update_cache: true\n\t
+\n\t
+- name: Installs php module\n\t
+  apt:\n\t
+    pkg: libapache2-mod-php\n\t
+    state: present\n\t
+\n\t
+- name: Installs git\n\t
+  apt:\n\t
+    pkg: git\n\t
+    state: present\n\t
+...\n\t
+")
+
+enter_to_continue
+
+"Aussi Ansible peut boucler (`loop:`) sur les objets d'une liste (`{{ item }}`) :"
+
+print("\t
+...\n\t
+- name: Installs necessary packages\n\t
+  apt:\n\t
+    name: {{ item }}\n\t
+    state: latest\n\t
+  loop:\n\t
+    - apache2\n\t
+    - libapache2-mod-php\n\t
+    - git\n\t
+...\n\t
+")
+
+enter_to_continue
+
+"Mais heureusement la bonne pratique veut que l'on puisse fournir une liste à l'argument `name:` du module `apt`."
+
+print("\t
+...\n\t
+- name: Installs necessary packages\n\t
+  apt:
+    name:\n\t
+      - apache2\n\t
+      - libapache2-mod-php\n\t
+      - git\n\t
+    state: latest\n\t
+...\n\t
+")
+
+enter_to_continue
+
+run(`cp /tutorials/files/step-8/apache.yml apache.yml`)
+
+"Allons examiner ce livre de jeu :"
+
+"*cat apache.yml*"
+
+prompt {
+    if success && command == "cat apache.yml" {
+        expect ("cat apache.yml")
+        ""
+        break
+    }
+}
+
+"Très bien. Nous pouvons exécuter le playbook avec la commande suivante :"
+
+"*ansible-playbook -i hosts -l host1.example.org apache.yml*"
+
+prompt {
+    if success && command == "ansible-playbook -i hosts -l host1.example.org apache.yml" {
+        expect ("ansible-playbook -i hosts -l host1.example.org apache.yml")
+        ""
+        say("Vous pouvez vous rendre sur l'URL `http://127.0.0.1:" + run (`echo $(($HOSTPORT_BASE+1))`) + "`, et vous devriez voir Bill Murray, et le hostname du serveur.")
+        say("! Souvenez-vous que nos hôtes sont des conteneurs Docker et que `le port 80 de host1.example.org` est exposé sur `le port " +  run (`echo $(($HOSTPORT_BASE+1))`) + " de votre machine locale`")
+        break
+    }
+}
+
+"Note : la directive `tags: ['deploy']` vous permet d'exécuter juste les tâches qui dispose de cette 'étiquette'. Cette fonctionnalité permet d'exécuter le playbook en partie seulement sur les tâches ainsi identifiées comme par exemple la mise à jour du site."
+
+"Voyons comment utiliser ce 'tag' `deploy` avec la commande suivante (option `--tags` ou `-t`) :"
+
+"*ansible-playbook -i hosts -l host1.example.org apache.yml -t deploy*"
+
+prompt {
+    if success && command == "ansible-playbook -i hosts -l host1.example.org apache.yml -t deploy" {
+        expect ("ansible-playbook -i hosts -l host1.example.org apache.yml -t deploy")
+        ""
+        "Super !"
+        break
+    }
+}
+
+"Très bien. Nous déploierons un second serveur Web dans la prochaine leçon."
+
+"C'est la fin de cette leçon."
+
+enter_to_continue

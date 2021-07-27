@@ -1,0 +1,346 @@
+lesson_name("Migration vers les rôles")
+make_and_go_ws
+clear_ws
+run(`cp -r /tutorials/files/step-12/* .`)
+
+"`Migration vers les rôles`"
+
+"Maintenant que notre playbook est terminé, remanions tout ! On va remplacer nos jeux par des rôles."
+
+"Les rôles ne sont qu'une nouvelle façon d'organiser les fichiers mais apportent des fonctionnalités intéressantes. Je n'entrerai pas dans les détails ici, puisqu'ils sont listés dans la documentation d'Ansible ( `http://docs.ansible.com/ansible/latest/playbooks.html`). Par exemple, une fonctionnalité remarquable est probablement la dépendance des rôles : le rôle B peut dépendre d'un autre rôle A. Ainsi, lorsque vous appliquez le rôle B, le rôle A sera automatiquement appliqué aussi."
+
+enter_to_continue
+
+"`Structure des rôles`"
+
+"Les rôles ajoutent un peu de 'magie' à Ansible : ils supposent une organisation spécifique de fichiers. Bien qu'il existe une disposition suggérée concernant les rôles, vous pouvez organiser les choses comme vous le souhaitez à l'aide des '`includes`'. Cependant, les conventions du rôle aident à construire des playbooks modulaires, et la maintenance sera beaucoup plus simple. Les rubyistes appelleraient ça 'convention over configuration'."
+
+"Veuillez presser la touche \"`Enter`/`Entrée`\" pour voir l'organisation des fichiers :"
+prompt {
+    if command == "" {
+        expect (" ")
+        break
+    }
+}
+
+"L'organisation des fichiers devrait ressembler à ceci :"
+
+print("\t
+roles\n\t
+  |\n\t
+  |_some_role\n\t
+       |\n\t
+       |_defaults\n\t
+       |   |\n\t
+       |   |_main.yml\n\t
+       |   |_...\n\t
+       |\n\t
+       |_files\n\t
+       |   |\n\t
+       |   |_file1\n\t
+       |   |_...\n\t
+       |\n\t
+       |_handlers\n\t
+       |   |\n\t
+       |   |_main.yml\n\t
+       |   |_some_other_file.yml\n\t
+       |   |_ ...\n\t
+       |\n\t
+       |_meta\n\t
+       |   |\n\t
+       |   |_main.yml\n\t
+       |   |_some_other_file.yml\n\t
+       |   |_ ...\n\t
+       |\n\t
+       |_tasks\n\t
+       |   |\n\t
+       |   |_main.yml\n\t
+       |   |_some_other_file.yml\n\t
+       |   |_ ...\n\t
+       |\n\t
+       |_templates\n\t
+       |   |\n\t
+       |   |_template1.j2\n\t
+       |   |_...\n\t
+       |\n\t
+       |_vars\n\t
+           |\n\t
+           |_main.yml\n\t
+           |_some_other_file.yml\n\t
+           |_ ...\n\t
+")
+
+"C'est très simple. Les fichiers nommés `main.yml` ne sont pas obligatoires, mais lorsqu'ils existent, les rôles les ajouteront automatiquement au jeu. Vous pouvez utiliser ce fichier pour 'inclure' d'autres tâches, handlers, ... dans le jeu. On verra ça dans une minute."
+
+enter_to_continue
+
+"Remarquez l'existence des dossiers `vars`, `meta` et `defaults` à côté des plus suggestifs `files`, `handlers`, `tasks` et `templates`."
+
+enter_to_continue
+
+"`dossiers vars et defaults`"
+
+"`vars' est utilisé lorsque vous voulez indiquer un certain nombre de variables concernant les rôles. Cependant, certains ne souhaitent pas mettre des variables dans des rôles (ou des jeux) directement. Ils pensent que les variables appartiennent à la configuration, tandis que les jeux en sont la structure. En d'autres termes, ils voient les jeux et les rôles comme une usine, et les données comme des intrants pour cette usine. Donc ils préfèrent avoir des 'données' (p. ex. variables) en dehors des rôles et des jeux. De cette façon, ils peuvent partager les rôles plus facilement, sans trop s'inquiéter d'exposer des données confidentielles. Mais c'est juste un conseil. Ansible vous permet de le faire comme vous le souhaitez."
+
+"Ceci dit, vous pourriez avoir des variables que vous ne voulez pas changer. Par exemple, si vous avez un rôle pour nginx qui extrait un paquet '.deb' d'un PPA, vous pouvez ajouter l'adresse PPA dans `vars/main.yml`. C'est quelque chose que vous pouvez configurer, mais qui sera surtout statique 99% du temps. L'utilisation de `vars` vous permettra de retirer ces informations de votre rôle, ce qui le rendra plus générique. Mais en fait, ce n'est jamais qu'une question de goût."
+
+"Par contre, pour de véritables variables (par exemple, les éléments que vous aimeriez utiliser dans un fichier de configuration généré par un modèle), vous pouvez définir des valeurs par défaut pour les rôles, et c'est d'ailleurs une pratique recommandée. L'utilisation de valeurs par défaut saines garantit que votre rôle fonctionne toujours. Par exemple, vous pouvez définir le nombre de serveurs pré-formés pour votre serveur Apache. Le meilleur endroit pour mettre les valeurs par défaut est... vous l'avez deviné, dans le dossier `defaults`."
+
+enter_to_continue
+
+"`dossier meta`"
+
+"Le dossier `meta` est l'endroit où vous pouvez ajouter des dépendances. C'est vraiment une fonctionnalité intéressante que l'on verra un plus loin dans la leçon."
+enter_to_continue
+
+"`dossier roles`"
+
+"Notez que les rôles se trouvent dans le dossier `roles`, ce qui est également sympathique puisqu'il réduira l'encombrement de haut niveau des playbooks et les rendra plus lisibles et accessibles. Mais vous pouvez configurer Ansible pour utiliser un autre dossier pour stocker les rôles ( voir la variable `roles_path` dans ansible.cfg : `http://docs.ansible.com/ansible/latest/intro_configuration.html#roles-path` ). De cette façon, vous pouvez créer une 'place centrale' pour tous vos rôles, et les utiliser dans tous vos livres de jeu."
+
+enter_to_continue
+
+"`Création du rôle Apache`"
+
+"Très bien. Puisque nous connaissons désormais l'organisation de fichier nécessaire, nous pouvons créer un rôle pour le livre de jeu apache."
+
+"Il y quatre étapes à passer pour la création du rôle Apache :"
+
+print("\t
+- créer un dossier roles et créer la structure d'un rôle apache\n\t
+- extraire le handler apache dans le fichier roles/apache/handlers/main.yml\n\t
+- déplacer le fichier de configuration d'apache awesome-app dans le dossier roles/apache/files/\n\t
+- créer un playbook qui invoque le rôle\n\t
+", "cyan")
+
+"Démarrons notre activité."
+
+enter_to_continue
+
+"`Créer la structure du rôle apache`"
+
+"D'abord, créons la structure de dossiers et de fichiers pour le rôle `apache`. Veuillez frapper la commande suivante :"
+
+"*mkdir -p roles/apache/{tasks,handlers,files}*"
+
+prompt {
+    if success && command == "mkdir -p roles/apache/{tasks,handlers,files}" {
+        expect ("mkdir -p roles/apache/{tasks,handlers,files}")
+        ""
+        break
+    }
+}
+
+"Il est nécessaire de copier les tâches contenues dans le fichier `apache_tasks.yml` dans le fichier `roles/apache/tasks/main.yml`"
+
+"Veuillez vérifier le fichier `apache_tasks.yml` que j'ai préparé pour vous."
+
+"*cat apache_tasks.yml*"
+
+prompt {
+    if success && command == "cat apache_tasks.yml" {
+        expect ("cat apache_tasks.yml")
+        ""
+        "Ce fichier n'est pas l'original mais c'est exactement le contenu du fichier `apache.yml` entre les entrées `tasks:` et `handlers:`."
+        break
+    }
+}
+
+"Déplaçons ce fichier dans son emplacement et avec son nom correct avec cette commande :"
+
+"*mv apache_tasks.yml roles/apache/tasks/main.yml*"
+
+prompt {
+    if success && command == "mv apache_tasks.yml roles/apache/tasks/main.yml" {
+        expect ("mv apache_tasks.yml roles/apache/tasks/main.yml")
+        ""
+
+        "Remarquez que toutes les références aux dossiers `files/` et `templates/` dans les tâches ont été enlevées. Puisque nous utilisons la structure des rôles, Ansible recherchera ces fichiers dans les bons dossiers."
+
+        "Très bien, passons à l'étape suivante de notre création de rôle Apache."
+        break
+    }
+}
+
+enter_to_continue
+
+"`Extraire le handler`"
+
+"J'ai extrait pour vous la partie `handlers:` dans le fichier `apache_handlers.yml`. Veuillez vérifier son contenu avec la commande suivante :"
+
+"*cat apache_handlers.yml*"
+
+prompt {
+    if success && command == "cat apache_handlers.yml" {
+        expect ("cat apache_handlers.yml")
+        ""
+        break
+    }
+}
+
+
+"Veuillez déplacer ce fichier dans `roles/apache/handlers/main.yml` avec la commande suivante :"
+
+"*mv apache_handlers.yml roles/apache/handlers/main.yml*"
+
+prompt {
+    if success && command == "mv apache_handlers.yml roles/apache/handlers/main.yml" {
+        expect ("mv apache_handlers.yml roles/apache/handlers/main.yml")
+        ""
+
+        break
+    }
+}
+
+"`Déplacer le fichier de configuration d'Apache`"
+
+"Aussi simple que cette commande :"
+
+"*mv files/awesome-app roles/apache/files/*"
+
+prompt {
+    if success && command == "mv files/awesome-app roles/apache/files/" {
+        expect ("mv files/awesome-app roles/apache/files/")
+        ""
+        break
+    }
+}
+
+"Nous n'avons plus besoin du dossier `files` ; nous pouvons l'effacer :"
+
+"*rm -rf files*"
+
+prompt {
+    if success && command =~ "rm -rf files\." {
+        expect ("rm -rf files")
+        ""
+        break
+    }
+}
+
+"A cet instant, le rôle apache est fonctionnel mais nous avons besoin d'un moyen de l'invoquer."
+
+"`Créer un playbook qui invoque le rôle`"
+
+"Je viens de créer un playbook de plus haut niveau que nous allons utiliser pour faire correspondre les hôtes et les groupes d'hôtes aux rôles. On l'appelera `site.yml`, puisque notre but est d'avoir une configuration à l'échelle du site. Mais ce n'st jamais qu'une convention."
+
+"Veullez vérifier le fichier `site.yml` au plus haut niveau avec la commande suivante :"
+
+"*cat site.yml*"
+
+prompt {
+    if success && command == "cat site.yml" {
+        expect ("cat site.yml")
+        ""
+        "Ce n'était pas si difficile."
+        break
+    }
+}
+
+"La seconde phase de cette Leçon est la création d'un rôle HAProxy"
+
+enter_to_continue
+
+"`Créer un rôle HAProxy`"
+
+"Nous pourrions créer un dossier de rôle haproxy avec la strcuture appropriée à l'aide de la commande mkdir comme nous l'avons fait pour le rôle apache :"
+
+print("\t
+mkdir -p roles/haproxy/{tasks,handlers,templates}\n\t
+")
+
+"Nous avons toutefois une autre possibilté avec le binaire `ansible-galaxy` en exécutant cette commande :"
+
+"*ansible-galaxy --offline init roles/haproxy*"
+
+prompt {
+    if success && command == "ansible-galaxy --offline init roles/haproxy" {
+        expect ("ansible-galaxy --offline init roles/haproxy")
+        ""
+        "Vous pouvez vérifier la structure des dossiers et fichiers avec la commande `ls -la roles/haproxy`."
+        break
+    }
+}
+
+"`Tâches et handler HAProxy`"
+
+"Ensuite, déplaçons le fichier `haproxy_tasks.yml` à l'emplacement et au nom correct avec cette commande :"
+
+"*mv haproxy_tasks.yml roles/haproxy/tasks/main.yml*"
+
+prompt {
+    if success && command == "mv haproxy_tasks.yml roles/haproxy/tasks/main.yml" {
+        expect ("mv haproxy_tasks.yml roles/haproxy/tasks/main.yml")
+        ""
+
+        break
+    }
+}
+
+"Ensuite, veuillez déplacer le fichier `haproxy_handlers.yml` dans roles/haproxy/handlers/main.yml"
+
+"*mv haproxy_handlers.yml roles/haproxy/handlers/main.yml*"
+
+prompt {
+    if success && command == "mv haproxy_handlers.yml roles/haproxy/handlers/main.yml" {
+        expect ("mv haproxy_handlers.yml roles/haproxy/handlers/main.yml")
+        ""
+
+        "C'est presque terminé !"
+        break
+    }
+}
+
+"Enfin, déplaçons le dossier `templates` (qui contient seulement le modèle du fichier de configurationde HAProxy) dans son emplacement approprié :"
+
+"*mv templates roles/haproxy/*"
+
+prompt {
+    if success && command == "mv templates roles/haproxy/" {
+        expect ("mv templates roles/haproxy/")
+        ""
+        break
+    }
+}
+
+"Très bien, le rôle `haproxy` est prêt à être utilisé !"
+
+"Nous pouvons enfin lancer notre playbook avec la commande suivante :"
+
+"*ansible-playbook -i hosts site.yml*"
+
+prompt {
+    if success && command == "ansible-playbook -i hosts site.yml" {
+        expect ("ansible-playbook -i hosts site.yml")
+        ""
+
+        "Parfait !"
+
+        say("Si vous ouvrez l'URL `http://127.0.0.1:" + run (`echo $HOSTPORT_BASE`) + "` dans un navigateur, voyez les résultats. Votre cluster est déployé !")
+
+        say("Vous pouvez même consulter les statistiques de HAProxy à l'adresse suivante : `http://127.0.0.1:" + run (`echo $HOSTPORT_BASE`) + "/haproxy?stats`")
+
+        say("! Souvenez-vous que nos hôtes sont des conteneurs Docker et que `le port 80 de host0.example.org` est exposé sur `le port " +  run (`echo $HOSTPORT_BASE`) + " de votre machine locale.`")
+        break
+
+        break
+    }
+}
+
+"Vous avez peut-être remarqué que l'exécution de tous les rôles dans `site.yml` peut prendre beaucoup de temps. Et si nous voulions seulement pousser les changements sur le group web ? C'est aisé avec l'option `--limit` ou `-l` comme ce qui suit :"
+
+"*ansible-playbook -i hosts -l web site.yml*"
+
+prompt {
+    if success && command == "ansible-playbook -i hosts -l web site.yml" {
+        expect ("ansible-playbook -i hosts -l web site.yml")
+        ""
+
+        "Ceci conclut notre leçon sur la migration vers les rôles. C'était relativement facile à réaliser tout en ajoutant de nombreuses  fonctionnalités à notre playbook que nous pourrons utiliser plus tard."
+
+        break
+    }
+}
+
+"C'est la fin de cette leçon."
+
+enter_to_continue

@@ -1,0 +1,89 @@
+lesson_name("Templates - Modèles")
+make_and_go_ws
+clear_ws
+run(`cp -r /tutorials/files/step-10/* .`)
+
+"`Templates - Modèles`"
+
+"Nous utiliserons `haproxy` comme équilibreur de charge. L'installation est fort semblable à celle d'apache. Mais la configuration est un peu plus délicate car il faut lister tous les serveurs web dans la configuration d'haproxy. Comment pouvons-nous faire cela ?"
+
+"`Modèle de configuration HAProxy`"
+
+"Ansible utilise `Jinja2` ( `https://jinja.palletsprojects.com/en/2.10.x/` ), un 'templating engine' pour Python. Lorsque vous écrivez des modèles Jinja2, vous pouvez utiliser n'importe quelle variable définie par Ansible."
+
+"Par exemple, si vous voulez éditer le `nom_inventaire` de l'hôte pour lequel le modèle est actuellement fabriqué, vous pouvez simplement écrire `{{ inventory_hostname }}` dans le modèle Jinja."
+
+"Ou si vous avez besoin de l'adresse IP de la première interface Ethernet (que vous connaissez grâce au module `setup`), vous n'avez qu'à écrire : `{{ ansible_eth0['ipv4']['address'] }}` dans votre modèle."
+
+"Les modèles Jinja2 supportent des conditions, des boucles, des filtres, etc."
+
+enter_to_continue
+
+"Je viens de créer un dossier nommé `templates` qui contient un modèle Jinja2 nommé `haproxy.cfg.j2`. L'extension `.j2` n'a aucune portée et elle est utilisée de manière conventionnelle."
+
+"Veuillez examiner le modèle Jinja2 en exécutant la commande suivante :"
+
+"*cat templates/haproxy.cfg.j2*"
+
+prompt {
+    if success && command == "cat templates/haproxy.cfg.j2" {
+        expect ("cat templates/haproxy.cfg.j2")
+        ""
+        "Il y pas mal de choses nouvelles à apprendre."
+        break
+    }
+}
+
+
+"D'abord, la valeur de la variable de l'hôte `{{ ansible_eth0['ipv4']['address'] }}` sera l'adresse IPv4 de l'interface eth0."
+
+"Ensuite, nous avons une boucle. Cette boucle est utilisée pour construire la liste des serveurs dits de 'backend'. Cela va boucler sur la liste des hôtes du groupe `web` et valoriser la variable `backend`. Tous les 'facts' des hôtes sont exposés dans la variable `hostvars`, il est donc facile d'accéder à d'autres variables hôtes (comme son nom d'hôte ou dans ce cas IP)."
+
+"Nous aurions pu écrire la liste des hôtes à la main, puisque nous n'en avons que deux. Mais nous espérons que le serveur aura beaucoup de succès et que nous en aurons besoin d'une centaine. Ainsi, ajouter des serveurs à la configuration ou en changer certains revient à ajouter ou supprimer des hôtes du groupe `web`."
+
+enter_to_continue
+
+"`Playbook HAProxy`"
+
+"Nous avons fait la partie la plus difficile du travail. Ecrire un playbook pour installer et configurer HAproxy est un jeu d'enfant."
+
+"Veuillez examiner ce livre de jeu en exécutant la commande suivante :"
+
+"*cat haproxy.yml*"
+
+prompt {
+    if success && command == "cat haproxy.yml" {
+        expect ("cat haproxy.yml")
+        ""
+        break
+    }
+}
+
+"Cela vous dit quelque chose, n'est-ce pas ? Le seul nouveau module ici est `template`, qui a les mêmes arguments que le module `copy`. Nous limitons aussi ce livre de jeu au groupe 'haproxy'."
+
+"Puisque notre inventaire ne contient que les hôtes nécessaires au cluster, nous n'avons pas besoin de limiter la liste d'hôtes et nous pouvons même exécuter les deux playbooks. Eh bien, à vrai dire, nous devons les exécuter tous les deux en même temps, puisque le playbook haproxy exige des 'facts' des deux serveurs web. Dans la prochaine leçon, nous montrerons comment éviter cela."
+
+"Veuillez exécuter la commande suivante pour lancer les deux playbooks :"
+
+"*ansible-playbook -i hosts apache.yml haproxy.yml*"
+
+prompt {
+    if success && command == "ansible-playbook -i hosts apache.yml haproxy.yml" {
+        expect ("ansible-playbook -i hosts apache.yml haproxy.yml")
+        ""
+        "Cela semble fonctionner."
+
+        say("Si vous ouvrez l'URL `http://127.0.0.1:" + run (`echo $HOSTPORT_BASE`) + "` dans un navigateur, voyez les résultats. Votre cluster est déployé !")
+
+        say("Vous pouvez même consulter les statistiques de HAProxy à l'adresse suivante : `http://127.0.0.1:" + run (`echo $HOSTPORT_BASE`) + "/haproxy?stats`")
+
+        say("! Souvenez-vous que nos hôtes sont des conteneurs Docker et que `le port 80 de host0.example.org` est exposé sur `le port " +  run (`echo $HOSTPORT_BASE`) + " de votre machine locale.`")
+        break
+    }
+}
+
+"Nous pouvons maintenant aborder la nouvelle leçon 'Encore des variables'."
+
+"C'est la fin de cette leçon."
+
+enter_to_continue

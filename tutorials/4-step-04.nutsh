@@ -1,0 +1,129 @@
+lesson_name("Playbooks")
+make_and_go_ws
+clear_ws
+run(`cp /tutorials/files/step-4/hosts hosts`)
+
+"`Playbooks Ansible`"
+
+"Un Playbook (livre de jeux) est un concept simple : une liste de commandes ansible (des tâches, `tasks`) comme celles utilisées par la ligne de commande `ansible`. Ces tâches ont pour cîbles un ensemble spcécifique d'hôtes ou de groupes d'hôtes."
+
+"Les fichiers nécessaires pour cette leçon devraient apparaître comme par magie de telle sorte que vous n'ayez pas besoin de les réécrire."
+
+"`Exemple Apache (a.k.a. Ansible's \"Hello World!\")`"
+
+"Examinons le fichier d'inventaire que nous avons préparé pour cette leçon en exécutant la commande suivante :"
+
+"*cat hosts*"
+
+prompt {
+    if success && command == "cat hosts" {
+        expect ("cat hosts")
+        ""
+        "Note: souvenez-vous que vous devriez utiliser les variables `ansible_host` et `ansible_user` dans la réalité."
+        break
+    }
+}
+
+run(`cp /tutorials/files/step-4/apache.yml apache.yml`)
+
+"Nous vous proposons d'écrire un playbook qui installe apache sur les machines du groupe `web`."
+
+"J'ai copié ce fichier pour vous dans le dossier courant, voyez son contenu en exécutant la commande suivante :"
+
+"*cat apache.yml*"
+
+prompt {
+    if success && command == "cat apache.yml" {
+        expect ("cat apache.yml")
+        ""
+        "Il nous suffit de dire ce que nous voulons faire en utilisant les bons modules. Ici, nous utilisons le module `apt` (http://docs.ansible.com/ansible/latest/apt_module.html) qui peut installer les paquets debian. Nous demandons également à ce module de mettre à jour le cache de paquets."
+
+        "Nous avons aussi ajouté un nom pour cette tâche. Bien que ce ne soit pas nécessaire, c'est très instructif quand le livre de jeu fonctionne, donc c'est très fortement recommandé."
+
+        "Dans l'ensemble, c'était assez facile !"
+
+        break
+    }
+}
+
+"Nous allons maintenant continuer avec la commande ci-dessous. Ici, `hosts` est le fichier d'inventaire, `-l` limite l'exécution à `host1.example.org` et `apache.yml` est notre playbook."
+
+"Maintenant, veuillez exécuter le playbook avec la commande suivante :"
+
+"*ansible-playbook -i hosts -l host1.example.org apache.yml*"
+
+prompt {
+    if success && command == "ansible-playbook -i hosts -l host1.example.org apache.yml" {
+        expect ("ansible-playbook -i hosts -l host1.example.org apache.yml")
+
+        "Bien ! Examinons cette sortie ligne par ligne."
+
+        break
+    }
+}
+
+enter_to_continue
+
+print ("\t
+PLAY [web] ********************* \n
+")
+
+"En premier lieu, Ansible nous indique qu'il exécute le jeu sur les hôtes `web`. Un jeu est la suite des instructions relatives à l'hôte. Si nous avions un autre hôte dans ce groupe, il apparaîtrait aussi."
+
+enter_to_continue
+
+print ("\t
+GATHERING FACTS ********************* \n\t
+ok: [host1.example.org]\n\t
+\n")
+
+"Avez-vous le souvenir de notre précédente leçon avec le module `setup` ? Avec chaque jeu, Ansible collecte par défaut les facts. Quand cela n'est pas nécessaire, on peut ajouter l'entrée `gather_facts: no` à hauteur de l'entrée `hosts:` et de l'entrée `tasks:`."
+
+
+enter_to_continue
+
+print ("\t
+TASK: [Installs apache web server] ********************* \n\t
+changed: [host1.example.org]\n\t
+\n")
+
+"Ensuite, l'élément concret, la seule et unique tâche qui est exéxutée et un retour nous indiquant `changed` supposant que quelque chose a changé sur  `host1.example.org`."
+
+
+enter_to_continue
+
+print ("\t
+PLAY RECAP ********************* \n\t
+host1.example.org              : ok=2    changed=1    unreachable=0    failed=0 \n\t
+\n")
+
+"Enfin, La sortie de Ansible offre un récupitulatif de ce qui s'est passé : deux tâches ont été exécutées (dont le `fact_gathering` implicite) et l'une d'elle a changé quelque chose sur l'hôte cible."
+
+
+enter_to_continue
+
+"Maintenant, recommençons la commande et soyons attentif à ce qui se passe :"
+
+"*ansible-playbook -i hosts -l host1.example.org apache.yml*"
+
+prompt {
+    if success && command == "ansible-playbook -i hosts -l host1.example.org apache.yml" {
+        expect ("ansible-playbook -i hosts -l host1.example.org apache.yml")
+
+        "Remarquons le champ `changed` est maintenant à `0`."
+
+        break
+    }
+}
+
+"Cela est parfaitement normal et c'est une fonctionnalité principale de Ansible. Le Playbook n'agira que si cela est nécessaire. On appelle cela l''idempotence'. Un livre de jeux devrait viser un état, quel que soit le nombre de fois que l'on exécute ce livre de jeu."
+
+enter_to_continue
+
+"`Affiner les choses`"
+
+"Assurément, notre playbook peut installer un serveur apache, mais il pourrait être un peu plus complet. Il pourrait ajouter un virtualhost, s'assurer qu'apache est redémarré. Il pourrait même déployer notre site web à partir d'un dépôt git. Faisons en sorte qu'il en soit ainsi."
+
+"C'est la fin de cette leçon."
+
+enter_to_continue

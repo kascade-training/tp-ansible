@@ -1,0 +1,75 @@
+lesson_name("Groupes et variables")
+make_and_go_ws
+clear_ws
+
+"`Regrouper des hôtes`"
+
+"Les hôtes dans un inventaire peuvent être groupés de manière arbitraire. Par exemple, vous pourriez avoir un groupe `debian`, un groupe `web-servers`, un groupe `production`, etc."
+
+enter_to_continue
+
+"Un groupe est instancié par un nom entre crochet `[groupe]`. Ici plus bas le groupe `debian` dispose de trois hôtes :"
+
+print("\t
+[debian]\n\t
+host0.example.org\n\t
+host1.example.org\n\t
+host2.example.org\n\t")
+
+"Mais on aurait pu l'exprimer de manière plus courte :"
+
+print("\t
+[debian]\n\t
+host[0:2].example.org\n\t")
+
+enter_to_continue
+
+"Vous pouvez définir des groupes 'enfants' avec une section `[groupname:children]` qui reprend ses enfants. Par exemple, pour organiser les différentes variantes Linux, vous pourriez faire ceci dans votre inventaire :"
+
+print("\t
+[ubuntu]\n\t
+host0.example.org\n\t
+\n\t
+[debian]\n\t
+host[1:2].example.org\n\t
+\n\t
+[linux:children]\n\t
+ubuntu\n\t
+debian\n\t")
+
+"Le regroupement permet ainsi de tirer parti de la mutualisation de la configuration."
+
+enter_to_continue
+
+"`Configurer des variables`"
+
+"Vous pouvez assigner des variables aux hôtes à partir de différents endroits : le fichier d'inventaire, dans des fichiers `host_vars` ou `group_vars`, sur la ligne de commande, ..."
+
+"Il est courant de définir les variables des hôtes dans les fichiers `host_vars` ou `group_vars` (on le verra plus loin). Mais on peut aussi les définir directement dans l'inventaire comme les variables `ansible_host` ou `ansible_user`."
+
+"Quand on utilise la commande `ansible-playbook` (pas la commande `ansible`), les variables peuvent être définies avec l'option `--extra-vars` (or `-e`). La commande `ansible-playbook` sera abordée lors de la prochaine leçon."
+
+"La variable `ansible_port` comme vous pouvez le supposer définit le port SSH qui sera utilisé par Ansible pour se connecter à l'hôte."
+
+print("\t
+[ubuntu]\n\t
+host0.example.org ansible_host=192.168.0.12 ansible_port=2222\n\t")
+
+enter_to_continue
+
+"Ansible cherchera des définitions de variables supplémentaires dans les fichiers de variables de groupe et d'hôte. Ces fichiers seront recherchés dans les dossiers `group_vars` et `host_vars` à l'intérieur du dossier où se trouve le fichier d'inventaire principal."
+
+"Ces fichiers sont examinés selon leur nom. Par exemple, avec l'inventaire précédent, les variables de l'hôtes `host0.example.org` seront recherchées dans ces fichiers :"
+
+print("\t
+- group_vars/linux\n\t
+- group_vars/ubuntu\n\t
+- host_vars/host0.example.org\n", "cyan")
+
+"Il importe peu que ces fichiers existent mais si c'est le cas, il seront utilisés par Ansible."
+
+"Maintenant que nous avons une connaissance de base des modules, des inventaires et des variables, nous pouvons explorer la réelle puissance de Ansible avec les livres de jeu (playbooks)."
+
+"C'est la fin de cette leçon."
+
+enter_to_continue

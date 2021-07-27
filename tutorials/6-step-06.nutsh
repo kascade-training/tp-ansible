@@ -1,0 +1,69 @@
+lesson_name("Playbooks et les erreurs")
+make_and_go_ws
+clear_ws
+run(`cp /tutorials/files/step-6/hosts hosts`)
+
+"`Redémarrer quand la configuration est correcte.`"
+
+"Nous avons installé apache, nous avons poussé le fichier de configuration virtualhost et nous avons redémarré le serveur. Mais comment faire en sorte de redémarrer le serveur seulement quand la configuration est corecte ? Voyons ce que nous pouvons faire."
+
+"`Sortir quand les choses tournent mal`"
+
+"Ansible a une fonctionnalité intéresante : il arrête tout processus quand quelque chose tourne mal. L'avantage est de ne pas aller plus loin quand une erreur est rencontrée."
+
+run(`cp -r /tutorials/files/step-6/files files`)
+
+"J'ai mis à jour le fichier `awesome-app` du fichier de configuration du virtualhost et j'y ai introduit une erreur."
+
+"Voyez vous-même l'erreur en exécutant la commande suivante :"
+
+"*cat files/awesome-app*"
+
+prompt {
+    if success && command == "cat files/awesome-app" {
+        expect ("cat files/awesome-app")
+        ""
+        "`RocumentDoot` au lieu de `DocumentRoot` :)"
+        break
+    }
+}
+
+"Comme déjà expliqué, quand une tâche échoue, le processus s'arrête (pour cet hôte en échec). Nous allons nous assurer que la configuration est valide avant de redémarrer le serveur. Nous commençons avant tout par ajouter l'hôte virtuel avant de supprimer le virtualhost par défaut et puis un redémarrage est envisagé sans 'casser' apache."
+
+
+"Notez que nous aurions dû le faire dès le départ. Comme nous avons déjà lancé notre playbook, le virtualhost par défaut est déjà désactivé. Peu importe : ce livre de jeu pourrait être utilisé sur d'autres hôtes innocents, alors protégeons-les."
+
+run(`cp /tutorials/files/step-6/apache.yml apache.yml`)
+
+"Examinons ce playbook en exécutant la commande suivante :"
+
+"*cat apache.yml*"
+
+prompt {
+    if success && command == "cat apache.yml" {
+        expect ("cat apache.yml")
+        ""
+        break
+    }
+}
+
+"Nous y sommes. Exécutons le playbook :"
+
+"*ansible-playbook -i hosts -l host1.example.org apache.yml*"
+
+prompt {
+    if ! success && command == "ansible-playbook -i hosts -l host1.example.org apache.yml" {
+        expect ("ansible-playbook -i hosts -l host1.example.org apache.yml")
+        ""
+        "Comme vous pouvez le constater `apache2ctl` rend un code de retour `\"rc\": 1` quand il échoue. Ansible est à l'écoute de ce retour et arrête de lire le playbook. Très bien, on avance."
+        break
+    }
+}
+
+"Mmmh, ce n'est pas terrible en réalité ... Notre hôte virtuel a quand même été ajouté. Tout redémarrage ultérieur d'apache se plaindra de notre configuration et arrêtera de fonctionner. Nous avons donc besoin d'un moyen de détecter les échecs et de revenir en arrière."
+
+"Ce sera le sujet de notre prochaine leçon."
+
+"C'est la fin de cette leçon."
+
+enter_to_continue

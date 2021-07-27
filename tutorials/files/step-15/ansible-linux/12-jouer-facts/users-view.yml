@@ -1,0 +1,11 @@
+- name: print out operating system
+  hosts: localhost
+  gather_facts: False
+  vars_files:
+    - data.yml
+  tasks:
+  - debug:
+      msg: "{{ item.name }}"
+    loop: "{{ users }}"
+  - debug:
+      msg: "{{ group }}"

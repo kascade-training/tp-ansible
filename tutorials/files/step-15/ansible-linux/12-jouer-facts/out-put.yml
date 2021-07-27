@@ -1,0 +1,12 @@
+- name: print out operating system
+  hosts: all
+  gather_facts: True
+  tasks:
+    - name: "facts"
+      setup:
+      register: output
+    - name: "print output"
+      debug:
+        msg: "{{ output }}"
+    - debug:
+        msg: "{{ ansible_all_ipv4_addresses }}"

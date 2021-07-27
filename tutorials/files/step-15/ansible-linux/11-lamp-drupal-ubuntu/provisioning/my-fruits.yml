@@ -1,0 +1,12 @@
+- name: "loop illustration"
+  hosts: localhost
+  vars:
+    fruits:
+      - apple
+      - orange
+      - pineapple   
+  tasks:
+    - name: "Print my Fruits"
+      debug:
+        msg: "{{ item }}"
+      loop: "{{ fruits }}"

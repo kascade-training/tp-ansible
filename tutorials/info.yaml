@@ -1,0 +1,5 @@
+name: "Tutoriel interactif Ansible"
+target: bash
+version: 1
+days:
+    2000-01-01: 15

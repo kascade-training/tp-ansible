@@ -1,0 +1,15 @@
+lesson_name("Exercices du support https://iac.goffinet.org")
+make_and_go_ws
+clear_ws
+run(`cp -r /tutorials/files/step-15/* .`)
+
+"Cette activité pas une leçon mais plutôt un 'bac à sable' pour vous permettre de jouer avec ansible dans cet environnement !"
+
+"N'oubliez pas que vous pouvez quitter en tapant `exit` ou `done` quand vous avez terminé."
+
+prompt {
+    if command == "done" {
+        expect ("done")
+        break
+    }
+}

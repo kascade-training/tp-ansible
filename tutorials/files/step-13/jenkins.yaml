@@ -1,0 +1,9 @@
+- hosts: jenkins
+  vars:
+    jenkins_hostname: "{{ ansible_hostname }}"
+    jenkins_repo_url: deb http://pkg.jenkins-ci.org/debian binary/
+    jenkins_repo_key_url: http://pkg.jenkins-ci.org/debian/jenkins-ci.org.key
+  roles:
+    - role: geerlingguy.java
+    - role: goffinet.jenkins
+      become: true

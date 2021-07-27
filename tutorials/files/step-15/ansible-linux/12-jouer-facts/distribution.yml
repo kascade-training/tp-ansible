@@ -1,0 +1,10 @@
+- name: print out distribution
+  hosts: all
+  gather_facts: True
+  tasks:
+    - name: "setup facts"
+      setup:
+      register: output
+    - name: "print output"
+      debug:
+       msg: " {{ ansible_distribution }} {{ ansible_distribution_version }}"

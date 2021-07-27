@@ -1,0 +1,55 @@
+lesson_name("Inventaire de base")
+make_and_go_ws
+clear_ws
+
+"`FICHIER D'INVENTAIRE`"
+
+"Avant de continuer, vous avez besoin d'un inventaire. L'emplacement par défaut d'un tel fichier est `/etc/ansible/hosts`."
+
+"Vous pouvez configurer Ansible pour qu'il utilise un autre emplacement pour désigner ce fichier, avec une variable d'environnement (`ANSIBLE_HOSTS`) ou encore, par exemple, en utilisant l'option `-i` avec le binaire `ansible` en indiquant le chemin du fichier d'inventaire."
+
+"Veuillez presser la touche \"`Enter`/`Entrée`\" pour continuer"
+prompt {
+    if command == "" {
+        expect(" ")
+        break
+    }
+}
+
+run(`cp /tutorials/files/step-1-2/hosts hosts`)
+
+"J'ai créé un fichier d'inventaire pour vous dans le dossier de travail (workspace) nommé `hosts`."
+
+"Veuillez exécuter *cat hosts* pour voir le contenu de votre premier fichier d'inventaire."
+
+prompt {
+    if success && command =~ "^cat hosts" {
+        expect ("cat hosts")
+        "`ansible_host` est une variable spéciale qui précise l'adresse IP que Ansible va utiliser pour joindre l'hôte."
+
+        "`ansible_user` est une autre `variable` spéciale qui indique à Ansible le nom d'utilisateur à emprunter pour la connexion SSH. Par défaut, Ansible utilise le nom d'utilisateur courant ou un autre par défaut définit dans le fichier de configuration ~/.ansible.cfg (`remote_user`)."
+        break
+    }
+}
+
+enter_to_continue
+
+"`TESTING`"
+
+"Maintenant que Ansible est installé, vérifions si tout fonctionne correctement"
+
+"Pour le test, nous allons exécuter le module ping sur tous les hôtes de l'inventaire."
+
+"Veuillez exécuter *ansible -m ping all -i hosts*"
+
+prompt {
+    if success && command =~ `^ansible -m ping all -i hosts` {
+        expect ("ansible -m ping all -i hosts")
+        "Très bien! Les 3 hôtes sont joingnables et Ansible peut communiquer avec chacun."
+        break
+    }
+}
+
+"Cette leçon est terminée !"
+
+enter_to_continue

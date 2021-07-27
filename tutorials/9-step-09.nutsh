@@ -1,0 +1,51 @@
+lesson_name("Etendre le playbook à plusieurs hôtes")
+make_and_go_ws
+clear_ws
+run(`cp /tutorials/files/step-9/hosts hosts`)
+run(`cp -r /tutorials/files/step-9/files files`)
+run(`cp /tutorials/files/step-9/apache.yml apache.yml`)
+
+"`Ajouter un autre serveur Web`"
+
+"Nous avons un serveur Web. Nous en voulons un second."
+
+"`Mettre à jour l'inventaire`"
+
+
+"Comme nous avons de grandes ambitions, nous allons ajouter un autre serveur web et un load balancer que nous configurerons dans la prochaine leçon. Mais terminons l'inventaire immédiatement."
+
+"Examinons le fichier d'inventaire qui a été préparé pour cette leçon."
+
+"*cat hosts*"
+
+prompt {
+    if success && command == "cat hosts" {
+        expect ("cat hosts")
+        ""
+        break
+    }
+}
+
+"`Configurer un autre serveur Web`"
+
+"Nous n'avons par travaillé inutilement. Déployer un autre serveur est d'une simplicité absolue désormais."
+
+"Tout ce que nous avons à faire , c'est enlever `-l host1.example.org` de la ligne de commande `ansible-playbook`. Souvenez-vous que `-l` est une option de la ligne de commande `ansible-playbook` qui permet de limiter le playbook à certains groupes ou hôtes de l'inventaire. Par défaut, c'est le groupe `all` qui fait l'objet du playbook."
+
+"On peut lancer le playbook avec la commande suivante :"
+
+"*ansible-playbook -i hosts apache.yml*"
+
+prompt {
+    if success && command == "ansible-playbook -i hosts apache.yml" {
+        expect ("ansible-playbook -i hosts apache.yml")
+        ""
+        break
+    }
+}
+
+"Maintenant que nous avons une ferme de serveurs Web, dans la prochaine leçon nous les mettrons en 'cluster' en plaçant un `load balancer`, un répartiteur de charge en frontal des clients."
+
+"C'est la fin de cette leçon."
+
+enter_to_continue

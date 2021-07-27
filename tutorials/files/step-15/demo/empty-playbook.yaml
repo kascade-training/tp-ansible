@@ -1,0 +1,10 @@
+---
+- name: "PLAY 1"
+  hosts: localhost
+  tasks:
+- name: "PLAY 2"
+  hosts: localhost
+  tasks:
+- name: "PLAY 3"
+  hosts: localhost
+  tasks:

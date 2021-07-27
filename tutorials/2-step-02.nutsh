@@ -1,0 +1,127 @@
+lesson_name("Premiers modules et facts")
+make_and_go_ws
+clear_ws
+run(`cp /tutorials/files/step-1-2/hosts hosts`)
+
+"`Communication avec les noeuds`"
+
+"Prêt à commencer ? "
+
+"Commençons par jouer avec la commande vue dans la leçon précédente : `ansible`. C'est une première commande parmi d'autres que Ansible fournit pour interagir avec les noeuds à gérer."
+
+enter_to_continue
+
+"`Faire quelque chose d'utile`"
+
+"Dans l'exemple de la leçon précédente `-m ping` désigne l'usage du module `ping`. Ce module est un des nombreux modules disponibles avec Ansible."
+
+"Ce module `ping` est très simple. Il ne demande aucun argument. On peut passer des arguments aux modules via l'option `-a` de la ligne de commande. Voyons quelques exemples d'autres modules."
+
+enter_to_continue
+
+"Module `Shell`"
+
+"Ce module vous permet d'exécuter n'importe qu'elle commande shell sur l'hôte distant."
+
+"Veuillez exécuter *ansible -i hosts -m shell -a 'uname -a' host0.example.org*"
+
+prompt {
+    if success && command == "ansible -i hosts -m shell -a 'uname -a' host0.example.org" {
+    	expect ("ansible -i hosts -m shell -a 'uname -a' host0.example.org")
+        "Facile !"
+        "Le prochain module est le module `copy`."
+        break
+    }
+}
+
+enter_to_continue
+
+"Module `Copy`"
+
+"Sans surprise ce module permet de réaliser la copie d'un fichier de la machine de contrôle et le noeud distant. Imaginons que nous voulions copier notre fichier `/etc/motd` dans le dossier /tmp` de l'hôte distant. Veuillez exécuter cette commande :"
+
+"*ansible -i hosts -m copy -a 'src=/etc/motd dest=/tmp/' host0.example.org*"
+
+prompt {
+    if success && command == "ansible -i hosts -m copy -a 'src=/etc/motd dest=/tmp/' host0.example.org" {
+    	expect ("ansible -i hosts -m copy -a 'src=/etc/motd dest=/tmp/' host0.example.org")
+        "Veuillez vérifier la sortie."
+        break
+    }
+}
+
+"Ansible (plus précisément le module `copy` exécuté sur le noeud distant) nous rend toute une série d'informations utiles dans le format JSON. Nous verrons plus loin comment utiliser ce format."
+
+"Nous allons maintenant aborder d'autres modules utiles. Ansible propose une très longue liste de modules (plusieurs milliers) qui permettent pratiquement tout faire sur un système."
+
+"On trouvera une documentation des modules sur Internet : `http://docs.ansible.com/ansible/latest/list_of_all_modules.html`; mais on peut aussi utiliser la commande `ansible-doc -l` pour lister les modules et, la commande `ansible-doc ping` pour afficher directement la commande du module ping."
+
+
+"Si vous ne trouvez pas le module qu'il vous faut, il est relativement facile d'écrire le vôtre. Python n'est pas nécessaire , il doit juste parler JSON."
+
+enter_to_continue
+
+"`Un seule commande pour tous les controler`"
+
+"Très bien, c'est très amusant cette surcouche sur la ligne de commande mais nous avons un certain nombre de noeuds à gérer. Voyons ce que cela donne sur les autres noeuds."
+
+"Imaginons que nous voulions récupérer certaines métadonnées sur les noeuds, des `facts` dans le jargon Ansible, comme par exemple la version d'Ubuntu qui est déployée sur les noeuds. C'est relativement facile ... Veuillez exécuter la commande suivante :"
+
+"*ansible -i hosts -m shell -a 'grep DISTRIB_RELEASE /etc/lsb-release' all*"
+
+prompt {
+    if success && command == "ansible -i hosts -m shell -a 'grep DISTRIB_RELEASE /etc/lsb-release' all" {
+    	expect ("ansible -i hosts -m shell -a 'grep DISTRIB_RELEASE /etc/lsb-release' all")
+        "`all` au groupe implicite qui reprend `tous` les hôtes de l'inventaire."
+        break
+    }
+}
+
+enter_to_continue
+
+"`Beaucoup d'autres facts`"
+
+"Comme c'est intuitif ! Mais cela pourrait devenir difficile si nous voulions plus d'informations comme les adresses IP, la RAM occupée, etc. La solution vient avec un autre module intéressant comme `setup` qui est spécialisé dans la collecte des facts (`facts gathering`)."
+
+"Voyez vous-même :"
+
+"*ansible -i hosts -m setup host0.example.org*"
+
+prompt {
+    if success && command == "ansible -i hosts -m setup host0.example.org" {
+    	expect ("ansible -i hosts -m setup host0.example.org")
+        "Le module nous offre une foule d'informations."
+        break
+    }
+}
+
+"Vous pouvez aussi filtrer les clés retournées, pour ne retenir que des informations spécifiques."
+"Par exemple, imaginons que nous voulions connaître la quantité de mémoire des hôtes : "
+
+"*ansible -i hosts -m setup -a 'filter=ansible_memtotal_mb' all*"
+
+prompt {
+    if success && command == "ansible -i hosts -m setup -a 'filter=ansible_memtotal_mb' all" {
+    	expect ("ansible -i hosts -m setup -a 'filter=ansible_memtotal_mb' all")
+        "Notez que les hôtes peuvent répondre dans un ordre différent des exécutions précédentes. Cela est dû aux capcités de 'parallélisation' de Ansible dans sa communication avec les hôtes."
+        break
+    }
+}
+
+"Vous pouvez filter sur d'autres clés comme `ansible_distribution` ou encore `ansible_lsb`. Notez aussi que pouvez utiliser le carctère `*` comme masque générique ('glob')."
+
+enter_to_continue
+
+"`Sélectionner des hôtes ('hosts')`"
+
+"Nous avons vu que `all` était le groupe par défaut qui reprenait tous les hôtes d'un iventaire. Mais Ansible fournit bien d'autres manières de sélectionner des hôtes : `http://docs.ansible.com/ansible/latest/intro_patterns.html`"
+
+"- `host0.example.org:host1.example.org` devrait désigner host0.example.org et host1.example.org"
+
+"- `host*.example.org` devrait désigner tous les hôtes dont le nom commence par le motif 'host' et se termine par le motif '.example.org'."
+
+"Il y a encore d'autres manières de manipuler les groupes d'inventaires, nous le verrons plus loin."
+
+"C'est la fin de cette leçon."
+
+enter_to_continue

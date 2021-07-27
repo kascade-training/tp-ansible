@@ -1,0 +1,64 @@
+lesson_name("Playbooks, pousser des fichiers sur les noeuds")
+make_and_go_ws
+clear_ws
+run(`cp /tutorials/files/step-5/hosts hosts`)
+
+"`Affiner la configuration d'apache`"
+
+"Nous avons installé apache, nous vous proposons de configurer un virtualhost."
+
+"`Affiner le playbook`"
+
+"Nous avons juste besoin d'un seul hôte virtuel sur notre serveur. Mais nous voulons remplacer les défauts par des éléments plus spécifiques. Concrètement, nous devons supprimer la configuration par défaut, envoyer notre fichier de configuration virtualhost, l'activer et redémarrer apache."
+
+run(`cp -r /tutorials/files/step-5/files files`)
+
+"Je viens juste de créer un dossier nommé `files` et j'ai ajouté la configuration de l'hôte virtuel pour host1.example.org ; nous l'avons appelé `awesome-app`."
+
+"Veuillez vérifier le fichier de configuration avec la commande suivante :"
+
+"*cat files/awesome-app*"
+
+prompt {
+    if success && command == "cat files/awesome-app" {
+        expect ("cat files/awesome-app")
+        ""
+        break
+    }
+}
+
+run(`cp /tutorials/files/step-5/apache.yml apache.yml`)
+
+"J'en ai profité pour mettre à jour le playbook que vous pouvez vérifier avec la commande suivante :"
+
+"*cat apache.yml*"
+
+prompt {
+    if success && command == "cat apache.yml" {
+        expect ("cat apache.yml")
+        ""
+        break
+    }
+}
+
+"Nous sommes prêtes à exécuter le playbook de la manière suivante :"
+
+"*ansible-playbook -i hosts -l host1.example.org apache.yml*"
+
+prompt {
+    if success && command == "ansible-playbook -i hosts -l host1.example.org apache.yml" {
+        expect ("ansible-playbook -i hosts -l host1.example.org apache.yml")
+        ""
+        "Génial !"
+        break
+    }
+}
+
+
+"Eh bien, en y réfléchissant, on va trop vite. Ne devrions-nous pas vérifier que la configuration est correcte avant de redémarrer apache ? De cette façon, nous ne risquons pas d'interrompre le service si notre fichier de configuration est incorrect."
+
+"Faisons cela dans la leçon suivante."
+
+"C'est la fin de cette leçon."
+
+enter_to_continue

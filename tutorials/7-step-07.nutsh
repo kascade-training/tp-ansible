@@ -1,0 +1,71 @@
+lesson_name("Playbooks et les conditions")
+make_and_go_ws
+clear_ws
+run(`cp /tutorials/files/step-7/hosts hosts`)
+run(`cp -r /tutorials/files/step-7/files files`)
+
+"`Utiliser les conditions`"
+
+"Nous avons installé apache, nous avons poussé notre fichier de configuration d'hôte virtuel et nous avons redémarré le serveur. Mais nous voulons revenir en arrière, à un état stable si les choses ne fonctionnent pas correctement."
+
+"`Rétablir la situation si cela va mal`"
+
+"Un avertissement est nécessaire : il n'y aucune magie ici. L'erreur qui nous occupe ne tient pas à Ansible qui n'est pas un système de Backup en soi. Il est de votre responsabilité de vous assurer que vos playbooks sont sûrs."
+
+"Toutefois ce retour est possible, nous allons le faire."
+
+"Comme nous l'avons dit, lorsqu'une tâche échoue, le traitement s'arrête... à moins que nous n'acceptions l'échec (et nous devrions le faire). Voici ce que nous allons faire : continuer le traitement s'il y a un échec, mais seulement pour revenir sur ce que nous avons fait."
+
+run(`cp /tutorials/files/step-7/apache.yml apache.yml`)
+
+"Examinons d'abord le contenu du playbook :"
+
+"*cat apache.yml*"
+
+prompt {
+    if success && command == "cat apache.yml" {
+        expect ("cat apache.yml")
+        ""
+        break
+    }
+}
+
+"La directive `register:` enregistre la sortie de l'exécution du module `command` (exit status, stdout, stderr, ...) dans une variable `result`."
+
+"La directive `when: result is failed` vérifie que la variable enregistrée (`result`) contient un statut 'failed'."
+
+"Exécutons le playbook avec la commande suivante :"
+
+"*ansible-playbook -i hosts -l host1.example.org apache.yml*"
+
+prompt {
+    if ! success && command == "ansible-playbook -i hosts -l host1.example.org apache.yml" {
+        expect ("ansible-playbook -i hosts -l host1.example.org apache.yml")
+        ""
+        "Cela semble fonctionner comme prévu."
+        break
+    }
+}
+
+"Tentons de voir si cela a vraiment fonctionné en redémarrant apache, mais comment ? Avec Ansible évidemment :)"
+
+"Veuillez exécuter la commande suivante :"
+
+"*ansible -i hosts -m service -a 'name=apache2 state=restarted' host1.example.org*"
+
+prompt {
+    if success && command == "ansible -i hosts -m service -a 'name=apache2 state=restarted' host1.example.org" {
+        expect ("ansible -i hosts -m service -a 'name=apache2 state=restarted' host1.example.org")
+        ""
+        "Très bien, nous constatons bien qu'apache n'est pas cassé suite à nos actions."
+        break
+    }
+}
+
+"Bien que cela semble beaucoup de travail, ce n'est pas le cas. Rappelez-vous que vous pouvez utiliser des variables presque partout, il est donc facile d'en faire un playbook général pour apache, et l'utiliser partout pour déployer vos virtualhosts. Écrivez-le une fois, utilisez-le partout."
+
+"Nous le ferons dans la leçon 10 mais pour l'instant, déployons notre site web en utilisant git dans la leçon suivante."
+
+"C'est la fin de cette leçon."
+
+enter_to_continue

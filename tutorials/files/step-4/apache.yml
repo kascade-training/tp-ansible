@@ -1,0 +1,7 @@
+- hosts: web
+  tasks:
+    - name: "Installs apache web server"
+      apt:
+        name: apache2
+        state: present
+        update_cache: true

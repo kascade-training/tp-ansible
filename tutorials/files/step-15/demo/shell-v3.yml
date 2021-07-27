@@ -1,0 +1,25 @@
+---
+#df-th-solution.yml
+- name: "print df -Th"
+  hosts: localhost
+  gather_facts: True
+  tasks:
+    - name: find total disk usage
+      shell: df -T | grep 'root' | awk '{print $3}'
+      register: df_total
+    - name: print total disk usage
+      debug:
+        msg: "{{ df_total }}"
+    - name: find disk used
+      shell: df -T | grep 'root' | awk '{print $4}'
+      register: df_used
+    - name: register disk used
+      set_fact:
+        used: "{{ df_used.stdout }}"
+    - name: print used var
+      debug:
+        msg: "{{ used }}"
+    - name: print this when Root partition exceed 1G
+      debug:
+        msg: "Root partition exceed 1G"
+      when: used|int > 1000000

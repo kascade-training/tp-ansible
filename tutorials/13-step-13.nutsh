@@ -1,0 +1,84 @@
+lesson_name("Utiliser des rôles Ansible Galaxy - Installer un serveur Jenkins")
+make_and_go_ws
+clear_ws
+run(`cp -r /tutorials/files/step-13/* .`)
+
+"Ansible Galaxy ( `http://docs.ansible.com/ansible/latest/galaxy.html` ) fait référence au site Web Galaxy grâce auquel les utilisateurs peuvent paratger des rôles mais aussi à la ligne de commande qui permet de les gérer."
+
+"Dans cette leçon, nous allons utiliser des rôles qui viennent de Ansible Galaxy pour installer un serveur d'intégration Jenkins."
+
+"Vous pouvez faire votre marché de rôles sur `https://galaxy.ansible.com/list#/roles`."
+
+"Veuillez exécuter la commande suivante pour installer le rôle qui nous intéresse :"
+
+"*ansible-galaxy install goffinet.jenkins*"
+
+prompt {
+    if success && command == "ansible-galaxy install goffinet.jenkins" {
+        expect ("ansible-galaxy install goffinet.jenkins")
+        ""
+        "Très bien !"
+        break
+    }
+}
+
+"Continuons nos opérations avec un fichier d'inventaire. Nous installerons le serveur d'intégration Jenkins sur l'hôte `host0.example.org`."
+
+"Veuillez vérifier l'inventaire que j'ai préparé pour vous en exécutant la commande suivante :"
+
+"*cat hosts*"
+
+prompt {
+    if success && command == "cat hosts" {
+        expect ("cat hosts")
+        ""
+        "Voyez-vous ? J'ai créé un groupe nommé `jenkins`. Ce n'est pas obligatoire mais c'est une bonne pratique."
+        break
+    }
+}
+
+""
+"Maintenant nous avons besoin d'un livre de jeu. Nous pouvons utiliser celui fourni comme exemple dans le repo github du rôle : `https://github.com/geerlingguy/ansible-role-jenkins#example-playbook`."
+
+"Veuillez examiner le playbook avec la commande suivante :"
+
+"*cat jenkins.yaml*"
+
+prompt {
+    if success && command == "cat jenkins.yaml" {
+        expect ("cat jenkins.yaml")
+        ""
+
+        "Ce playbook inclut un autre role qui installe `java` (qui est indispensable à jenkins). Ce rôle a déjà été installé avec notre première commande `ansible-galaxy install ...` car `goffinet.jenkins` dépend de `geerlingguy.java`."
+
+        "Tout est prêt ! Nous pouvons démarrer !"
+
+        break
+    }
+}
+
+"Veuillez exécuter la commande suivante pour lancer le playbook :"
+
+"*ansible-playbook -i hosts jenkins.yaml*"
+
+prompt {
+    if success && command == "ansible-playbook -i hosts jenkins.yaml" {
+        expect ("ansible-playbook -i hosts jenkins.yaml")
+        ""
+
+        "Perfect!"
+
+        say("Veuillez vous rendre sur l'URL `http://127.0.0.1:" + run (`echo $(($HOSTPORT_BASE+3))`) + "` et vous verrez le résultat!")
+
+        say("Vous pouvez vous enregistrer avec `admin/admin` :)")
+
+        say("! Souvenez-vous que nos hôtes sont des conteneurs Docker et que `le port 8080 of host0.example.org` est exposé sur `le port " +  run (`echo $(($HOSTPORT_BASE+3))`) + " de votre machine locale`")
+
+        break
+    }
+}
+
+
+"C'est la fin de cette leçon."
+
+enter_to_continue

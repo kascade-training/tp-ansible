@@ -1,0 +1,9 @@
+---
+- name: "PLAY 1: tasks playbook"
+  hosts: localhost
+  connection: local
+  pre_tasks:
+  roles:
+  tasks:
+  post_tasks:
+  handlers:

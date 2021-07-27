@@ -1,0 +1,14 @@
+version: '3'
+services:
+  www01:
+    image: goffinet/usshd:latest 
+    ports:
+     - "221:22"
+     - "8001:80"
+     - "4431:443"
+  www02:
+    image: goffinet/usshd:latest
+    ports:
+     - "222:22"
+     - "8002:80"
+     - "4432:443"

@@ -1,0 +1,60 @@
+lesson_name("Pour commencer")
+make_and_go_ws
+
+"Bienvenue dans le tutoriel interactif sur Ansible !"
+
+"Cette leçon vise à vous familiariser avec l'environnement."
+
+"Maintenant, vous êtes à l'intérieur d'un conteneur Docker dans lequel Ansible est installé."
+
+"Veuillez vérifier que `ansible` est installé en exécutant la commande suivante :"
+
+"*ansible --version*"
+
+prompt {
+    if success && command == "ansible --version" {
+        expect ("ansible --version")
+        ""
+        break
+    }
+}
+
+"Il y a 3 conteneurs Docker supplémentaires qui se comportent comme n'importe quel ordinateur et qui feront office de noeud Ansible à gérer tout au long de ce tutoriel."
+
+"Veuillez exécuter la commande suivante pour vérifier que ces 3 trois hôtes ont démarrés et sont accessibles :"
+
+"*fping host{0,1,2}.example.org*"
+
+prompt {
+    if success && command == "fping host{0,1,2}.example.org" {
+        expect ("fping host{0,1,2}.example.org")
+        ""
+        "Super !"
+        break
+    }
+}
+
+"Ces hôtes sont déjà approvisionnés avec la clé SSH du noeud sur lequel vous êtes. Vous ne devriez alors pas vous soucier de la configuration des clés de configuration. Vous pouvez vous y connecter directement en SSH avec le compte `root`."
+
+"Veuillez tenter de vous conneceter sur host0.example.org et n'oubliez pas de revenir ici (exécutez *exit*)."
+
+"*ssh host0.example.org*"
+
+prompt {
+    if success && command =~ "ssh host0.example.org.*" {
+        expect (`ssh host0.example.org -o "StrictHostKeyChecking no" "whoami"`)
+        ""
+        "Heureux de vous revoir :)"
+        break
+    }
+}
+
+"Le dossier `ansible-interactive-tutorial/workspace` est monté dans `/root/workspace` à l'intérieur du conteneur. Vous pouvez de la sorte utiliser votre outil favori pour éditer vos fichiers. Ceci dit, il ne sera pas nécessaire d'éditer des fichiers pour suivre les leçons du tutoriel."
+
+"Vous pouvez entrer dans immédiatement dans n'importe quelle leçon, mais il est fortement recommandé de les suivre dans l'ordre car elles sont toutes contruites sur celle qui précède."
+
+"Veuillez vous rappeler que vous pouvez toujours sortir d'une leçon en tapant *exit* sur le terminal."
+
+"Vous êtes maintenant prêt pour commencer la première leçon du tutoriel interactif sur Ansible !"
+
+enter_to_continue
